@@ -377,6 +377,10 @@
             }, {});
 
             for (const [category, items] of Object.entries(grouped)) {
+                
+                // จัดเรียงรายการราคาจากน้อยไปมาก ในแต่ละหมวดหมู่
+                items.sort((a, b) => Number(a.price) - Number(b.price));
+
                 let html = `
                     <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm h-fit">
                         <div class="flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
@@ -717,7 +721,10 @@
                 return;
             }
 
-            globalServices.forEach((item) => {
+            // จัดเรียงรายการราคาจากน้อยไปมาก สำหรับหน้าจัดการหลังบ้าน
+            const sortedServices = [...globalServices].sort((a, b) => Number(a.price) - Number(b.price));
+
+            sortedServices.forEach((item) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50/80 transition border-b border-gray-100">
                         <td class="p-3.5 font-mono text-xs text-gray-500">${escapeHtml(item.id)}</td>
@@ -744,7 +751,6 @@
             const select = document.getElementById('serviceFormCatSelect');
             select.innerHTML = '';
 
-            // ดึงหมวดหมู่ที่ไม่ซ้ำกัน
             const uniqueCats = [...new Set(globalServices.map(s => s.category).filter(c => c))];
             
             uniqueCats.forEach(cat => {
@@ -752,7 +758,6 @@
                 select.innerHTML += `<option value="${escapeHtml(cat)}" ${isSelected}>${escapeHtml(cat)}</option>`;
             });
 
-            // เพิ่มตัวเลือกสร้างหมวดหมู่ใหม่ต่อท้าย
             const isNewSelected = (selectedCategory === 'NEW' || (selectedCategory && !uniqueCats.includes(selectedCategory))) ? 'selected' : '';
             select.innerHTML += `<option value="NEW" class="font-semibold text-gray-900" ${isNewSelected}>+ เพิ่มหมวดหมู่ใหม่...</option>`;
 
@@ -776,7 +781,6 @@
             document.getElementById('serviceFormModal').classList.remove('hidden');
             
             if (id) {
-                // โหมดแก้ไข
                 const service = globalServices.find(s => s.id === id);
                 document.getElementById('serviceFormTitle').innerText = 'แก้ไขรายการบริการ';
                 document.getElementById('serviceFormId').value = service.id;
@@ -784,7 +788,6 @@
                 document.getElementById('serviceFormName').value = service.name;
                 document.getElementById('serviceFormPrice').value = service.price;
             } else {
-                // โหมดเพิ่มใหม่
                 document.getElementById('serviceFormTitle').innerText = 'เพิ่มบริการใหม่';
                 document.getElementById('serviceFormId').value = '';
                 populateCategoryDropdown();
