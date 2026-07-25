@@ -18,23 +18,49 @@
         .banner-box { width: 728px; height: 90px; max-width: 100%; object-fit: cover; margin: 0 auto; display: block; border-radius: 8px; border: 1px solid #E5E7EB; background-color: #F3F4F6; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+        
+        /* เอฟเฟกต์กรอบเลเซอร์ */
+        .laser-box {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            z-index: 1;
+            padding: 2px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            height: fit-content;
+        }
+        .laser-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 75%, #111827 100%);
+            animation: rotateLaser 3s linear infinite;
+            z-index: -2;
+        }
+        .laser-box::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: white;
+            border-radius: calc(1rem - 2px);
+            z-index: -1;
+        }
+        @keyframes rotateLaser {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative pb-28">
 
     <nav class="glass-nav fixed w-full top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="https://s.imgz.io/2026/07/21/IMG_6481018b99c0e19bc4b2.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm">
-                <div>
-                    <span class="font-semibold text-base tracking-wide text-gray-900 block leading-tight">SNI sindy</span>
-                    <span class="text-[10px] text-gray-400 block tracking-wider uppercase">Web App Development</span>
-                </div>
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+            <img src="https://s.imgz.io/2026/07/21/IMG_6481018b99c0e19bc4b2.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm">
+            <div>
+                <span class="font-semibold text-base tracking-wide text-gray-900 block leading-tight">SNI sindy</span>
+                <span class="text-[10px] text-gray-400 block tracking-wider uppercase">Web App Development</span>
             </div>
-            <button onclick="promptAdmin()" class="text-xs text-gray-500 hover:text-black flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-gray-100 transition border border-gray-200">
-                <i class="fa-solid fa-user-shield text-xs"></i>
-                <span>หลังบ้าน</span>
-            </button>
         </div>
     </nav>
 
@@ -55,6 +81,10 @@
             </div>
         </div>
     </main>
+
+    <button onclick="promptAdmin()" class="fixed bottom-24 right-4 z-40 bg-white w-12 h-12 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.1)] border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black transition-all group">
+        <i class="fa-solid fa-gear group-hover:rotate-90 transition-transform duration-500 text-lg"></i>
+    </button>
 
     <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
@@ -209,10 +239,15 @@
                         <label for="adminPopupActive" class="text-sm font-medium text-gray-700">เปิดใช้งานป้ายประกาศ Pop-up เมื่อเข้าหน้าแรก</label>
                     </div>
 
-                    <div class="pt-3">
+                    <h3 class="text-base font-semibold text-gray-800 mt-6 pt-4 border-t border-gray-200">จัดเรียงหมวดหมู่บนหน้าเว็บ</h3>
+                    <p class="text-xs text-gray-500 mb-2">กดลูกศรขึ้น/ลง เพื่อจัดเรียงลำดับการแสดงผลหมวดหมู่</p>
+                    <div id="adminCategorySortList" class="space-y-2 mb-4">
+                        </div>
+
+                    <div class="pt-4 border-t border-gray-200 mt-6">
                         <button id="btnSaveSettings" onclick="saveAdminSettings()" class="bg-black text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
-                            <span>บันทึกการตั้งค่า</span>
+                            <span>บันทึกการตั้งค่าทั้งหมด</span>
                         </button>
                     </div>
                 </div>
@@ -294,6 +329,9 @@
         const ADMIN_PIN = '0000s';
 
         let globalServices = [];
+        let globalSettings = {};
+        let currentCategoryOrder = [];
+        
         let cart = {};
         let currentTotal = 0;
         let selectedSlipBase64 = null;
@@ -322,7 +360,9 @@
                 const res = await fetchAPI({ action: 'getInitialData' });
                 if (res.status === 'success') {
                     globalServices = res.services || [];
-                    renderSettings(res.settings || {});
+                    globalSettings = res.settings || {};
+                    renderSettings(globalSettings);
+                    initializeCategorySort();
                     renderServices(globalServices);
                 } else {
                     showToast('error', res.message || 'ไม่สามารถโหลดข้อมูลได้');
@@ -355,6 +395,56 @@
             document.getElementById('adminPopupText').value = settings.PopupText || '';
             document.getElementById('adminPopupActive').checked = (settings.PopupActive === 'true');
         }
+        
+        // ระบบจัดการ Category Sort
+        function initializeCategorySort() {
+            const uniqueCats = [...new Set(globalServices.map(s => s.category).filter(c => c))];
+            let savedOrder = (globalSettings.CategoryOrder || '').split(',').filter(c => c);
+
+            currentCategoryOrder = [];
+            savedOrder.forEach(cat => {
+                if (uniqueCats.includes(cat)) {
+                    currentCategoryOrder.push(cat);
+                }
+            });
+            uniqueCats.forEach(cat => {
+                if (!currentCategoryOrder.includes(cat)) {
+                    currentCategoryOrder.push(cat);
+                }
+            });
+
+            renderCategorySortList();
+        }
+
+        function renderCategorySortList() {
+            const list = document.getElementById('adminCategorySortList');
+            list.innerHTML = '';
+            
+            if (currentCategoryOrder.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-400">ยังไม่มีหมวดหมู่</p>`;
+                return;
+            }
+
+            currentCategoryOrder.forEach((cat, index) => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between bg-white border border-gray-200 p-2.5 rounded-lg shadow-sm">
+                        <span class="text-sm font-medium text-gray-700"><i class="fa-solid fa-list text-gray-400 mr-2 text-xs"></i> ${escapeHtml(cat)}</span>
+                        <div class="flex gap-1">
+                            <button onclick="moveCategory(${index}, -1)" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition disabled:opacity-20" ${index === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up text-xs"></i></button>
+                            <button onclick="moveCategory(${index}, 1)" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition disabled:opacity-20" ${index === currentCategoryOrder.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function moveCategory(index, direction) {
+            if (index + direction < 0 || index + direction >= currentCategoryOrder.length) return;
+            const temp = currentCategoryOrder[index];
+            currentCategoryOrder[index] = currentCategoryOrder[index + direction];
+            currentCategoryOrder[index + direction] = temp;
+            renderCategorySortList();
+        }
 
         function renderServices(services) {
             const container = document.getElementById('serviceContainer');
@@ -376,18 +466,21 @@
                 return acc;
             }, {});
 
-            for (const [category, items] of Object.entries(grouped)) {
-                
-                // จัดเรียงรายการราคาจากน้อยไปมาก ในแต่ละหมวดหมู่
+            // แสดงผลตามลำดับที่จัดเรียงไว้
+            currentCategoryOrder.forEach(category => {
+                const items = grouped[category];
+                if (!items) return;
+
                 items.sort((a, b) => Number(a.price) - Number(b.price));
 
                 let html = `
-                    <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm h-fit">
-                        <div class="flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
-                            <i class="fa-solid fa-folder-minus text-xs text-gray-400"></i>
-                            <h2 class="text-base font-bold text-gray-800">${escapeHtml(category)}</h2>
-                        </div>
-                        <div class="space-y-2.5">
+                    <div class="laser-box">
+                        <div class="relative z-10 p-5">
+                            <div class="flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
+                                <i class="fa-solid fa-folder-minus text-xs text-gray-400"></i>
+                                <h2 class="text-base font-bold text-gray-800">${escapeHtml(category)}</h2>
+                            </div>
+                            <div class="space-y-2.5">
                 `;
 
                 items.forEach(item => {
@@ -404,9 +497,9 @@
                     `;
                 });
 
-                html += `</div></div>`;
+                html += `</div></div></div>`;
                 container.innerHTML += html;
-            }
+            });
         }
 
         function toggleItem(id, name, price, isChecked) {
@@ -476,7 +569,6 @@
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-                    // 1. พยายามหา QR Code 
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
                     if (code) {
                         scannedQRData = code.data;
@@ -721,7 +813,6 @@
                 return;
             }
 
-            // จัดเรียงรายการราคาจากน้อยไปมาก สำหรับหน้าจัดการหลังบ้าน
             const sortedServices = [...globalServices].sort((a, b) => Number(a.price) - Number(b.price));
 
             sortedServices.forEach((item) => {
@@ -744,9 +835,6 @@
             });
         }
 
-        // ==========================================
-        // ระบบฟอร์มเพิ่ม/แก้ไข สินค้าแบบใหม่ (Easy Form)
-        // ==========================================
         function populateCategoryDropdown(selectedCategory = '') {
             const select = document.getElementById('serviceFormCatSelect');
             select.innerHTML = '';
@@ -847,7 +935,6 @@
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> บันทึกข้อมูล`;
             }
         }
-        // ==========================================
 
         function deleteServiceAction(id) {
             Swal.fire({
@@ -882,7 +969,8 @@
                 action: 'adminUpdateSettings',
                 bannerUrl: document.getElementById('adminBanner').value.trim(),
                 popupText: document.getElementById('adminPopupText').value.trim(),
-                popupActive: document.getElementById('adminPopupActive').checked.toString()
+                popupActive: document.getElementById('adminPopupActive').checked.toString(),
+                categoryOrder: currentCategoryOrder.join(',')
             };
 
             try {
@@ -890,6 +978,8 @@
                 if (res.status === 'success') {
                     showToast('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
                     document.getElementById('mainBanner').src = payload.bannerUrl || 'https://via.placeholder.com/728x90';
+                    // รีโหลดข้อมูลให้หน้าเว็บเรียงใหม่
+                    await fetchInitialData();
                 } else {
                     Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
                 }
@@ -897,7 +987,7 @@
                 Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกการตั้งค่าได้', icon: 'error', confirmButtonColor: '#000000' });
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> <span>บันทึกการตั้งค่า</span>`;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> <span>บันทึกการตั้งค่าทั้งหมด</span>`;
             }
         }
 
