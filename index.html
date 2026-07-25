@@ -3,163 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNI sindy - Web App Services</title>
+    <title>SNI sindy - บริการรับทำเว็บแอปพลิเคชัน</title>
+    <link rel="icon" type="image/jpeg" href="https://s.imgz.io/2026/07/21/IMG_6481018b99c0e19bc4b2.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #FAFAFA; color: #333; }
-        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #eee; }
-        .banner-container { width: 728px; height: 90px; max-width: 100%; object-fit: cover; margin: 0 auto; display: block; border-radius: 8px; background-color: #eee; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #333; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        * { font-family: 'Prompt', sans-serif; }
+        body { background-color: #FAFAFA; color: #111827; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #E5E7EB; }
+        .banner-box { width: 728px; height: 90px; max-width: 100%; object-fit: cover; margin: 0 auto; display: block; border-radius: 8px; border: 1px solid #E5E7EB; background-color: #F3F4F6; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative pb-24">
+<body class="min-h-screen flex flex-col relative pb-28">
 
-    <!-- Navbar -->
-    <nav class="glass-nav fixed w-full top-0 z-40 transition-all">
+    <nav class="glass-nav fixed w-full top-0 z-40">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="https://s.imgz.io/2026/07/21/IMG_6481018b99c0e19bc4b2.jpeg" alt="Logo" class="w-10 h-10 rounded-full border">
-                <span class="font-semibold text-lg tracking-wide">SNI sindy</span>
+                <img src="https://s.imgz.io/2026/07/21/IMG_6481018b99c0e19bc4b2.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm">
+                <div>
+                    <span class="font-semibold text-base tracking-wide text-gray-900 block leading-tight">SNI sindy</span>
+                    <span class="text-[10px] text-gray-400 block tracking-wider uppercase">Web App Development</span>
+                </div>
             </div>
-            <button onclick="promptAdmin()" class="text-xs text-gray-400 hover:text-gray-800 transition">Management</button>
+            <button onclick="promptAdmin()" class="text-xs text-gray-500 hover:text-black flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-gray-100 transition border border-gray-200">
+                <i class="fa-solid fa-user-shield text-xs"></i>
+                <span>หลังบ้าน</span>
+            </button>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="flex-grow max-w-6xl mx-auto px-4 pt-24 w-full">
-        <!-- Banner -->
-        <div class="mb-8 text-center">
-            <img id="mainBanner" src="" alt="Banner" class="banner-container shadow-sm hidden">
+    <main class="flex-grow max-w-5xl mx-auto px-4 pt-20 w-full">
+        <div class="my-6 text-center">
+            <img id="mainBanner" src="https://via.placeholder.com/728x90?text=SNI+sindy+Web+App+Service" alt="Banner" class="banner-box shadow-sm">
         </div>
 
-        <div class="text-center mb-10">
-            <h1 class="text-2xl font-semibold mb-2">เลือกรูปแบบระบบที่ต้องการ</h1>
-            <p class="text-gray-500 text-sm">ปรับแต่งฟังก์ชันเว็บแอปพลิเคชันของคุณได้ตามต้องการ</p>
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-1">เลือกฟังก์ชันเว็บแอปพลิเคชันของคุณ</h1>
+            <p class="text-gray-500 text-sm">เลือกหมวดหมู่และระบบที่คุณต้องการใช้งาน พร้อมคำนวณราคารวมทันที</p>
         </div>
 
-        <!-- Service Categories -->
-        <div id="serviceContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <!-- ข้อมูลจะถูกโหลดจาก GAS -->
-            <div class="text-center text-gray-400 py-10 w-full col-span-full">กำลังโหลดข้อมูล...</div>
+        <div id="serviceContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div class="col-span-full text-center py-12 text-gray-400 flex flex-col items-center gap-2">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+                <span class="text-sm">กำลังโหลดข้อมูลระบบ...</span>
+            </div>
         </div>
     </main>
 
-    <!-- Bottom Bar (Total & Checkout) -->
-    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div>
-                <span class="text-gray-500 text-sm">ยอดรวมทั้งหมด</span>
-                <div class="text-2xl font-semibold text-gray-800"><span id="totalPrice">0</span> THB</div>
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">ยอดรวมทั้งสิ้น</span>
+                    <div class="text-xl font-bold text-gray-900"><span id="totalPrice">0</span> <span class="text-sm font-normal text-gray-500">THB</span></div>
+                </div>
             </div>
-            <button id="checkoutBtn" onclick="openCheckout()" class="bg-black text-white px-8 py-3 rounded-md hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                ชำระเงิน
+            <button id="checkoutBtn" onclick="openCheckout()" disabled class="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+                <span>ชำระเงิน</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
         </div>
     </div>
 
-    <!-- Checkout Modal -->
-    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-40 hidden z-50 flex justify-center items-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="closeCheckout()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl">&times;</button>
-            <h2 class="text-xl font-semibold mb-4 text-center">ชำระเงิน</h2>
+    <div id="checkoutModal" class="fixed inset-0 bg-black/50 hidden z-50 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeCheckout()" class="absolute top-4 right-4 text-gray-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
             
-            <div class="bg-gray-50 p-4 rounded-lg mb-4 text-center border">
-                <p class="text-sm text-gray-500">บัญชีรับเงิน</p>
-                <p class="font-medium text-lg">ร้านค้าออมสินมหาเฮง (คิงแอดส์)</p>
-                <img src="https://s.imgz.io/2026/07/15/IMG_75242612165b6fd16c31.jpeg" alt="QR Code" class="w-48 h-48 mx-auto my-3 rounded-md shadow-sm">
-                <p class="text-sm text-gray-500">ยอดที่ต้องชำระ</p>
-                <p class="text-2xl font-semibold text-black"><span id="modalTotal">0</span> THB</p>
+            <div class="text-center mb-6">
+                <h2 class="text-lg font-bold text-gray-900">สรุปยอดชำระเงิน</h2>
+                <p class="text-xs text-gray-500">สแกน QR Code และแนบสลิป ระบบจะตรวจสอบยอดเงินอัตโนมัติ</p>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl p-5 mb-5 border border-gray-100 text-center">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">ชื่อบัญชีรับเงิน</p>
+                <p class="font-semibold text-gray-800 text-sm mb-3">ร้านค้าออมสินมหาเฮง (คิงแอดส์)</p>
+                
+                <div class="bg-white p-3 rounded-lg inline-block border border-gray-200 shadow-sm mb-3">
+                    <img src="https://s.imgz.io/2026/07/15/IMG_75242612165b6fd16c31.jpeg" alt="QR Code" class="w-44 h-44 object-contain mx-auto">
+                </div>
+
+                <div class="mt-2">
+                    <span class="text-xs text-gray-500 block">ยอดเงินที่ต้องโอน</span>
+                    <span class="text-2xl font-bold text-black"><span id="modalTotal">0</span> <span class="text-sm font-normal">THB</span></span>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase">รายการที่เลือก</label>
+                <div id="modalItemsList" class="space-y-1.5 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 max-h-32 overflow-y-auto custom-scrollbar">
+                </div>
             </div>
 
             <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">อัปโหลดสลิปโอนเงิน (ระบบจะตรวจสอบอัตโนมัติ)</label>
-                <input type="file" id="slipInput" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition">
+                <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase">แนบสลิปการโอนเงิน</label>
+                <div class="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:border-gray-400 transition bg-gray-50 relative">
+                    <input type="file" id="slipInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div id="uploadPlaceholder" class="flex flex-col items-center gap-1 text-gray-500">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400"></i>
+                        <span class="text-xs font-medium">คลิกเพื่อเลือกรูปภาพสลิป</span>
+                        <span class="text-[10px] text-gray-400">ระบบ AI จะสแกนหาตัวเลขยอดเงินจากภาพสลิปโดยตรง</span>
+                    </div>
+                    <div id="uploadSuccess" class="hidden flex items-center justify-center gap-2 text-gray-800 font-medium text-xs">
+                        <i class="fa-solid fa-file-image text-lg"></i>
+                        <span id="fileNameDisplay">เลือกไฟล์เรียบร้อยแล้ว</span>
+                    </div>
+                </div>
                 <canvas id="qrCanvas" class="hidden"></canvas>
             </div>
 
-            <button id="confirmOrderBtn" onclick="submitOrder()" class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition disabled:opacity-50 flex justify-center items-center gap-2">
-                ยืนยันการสั่งซื้อ
+            <button id="confirmOrderBtn" onclick="submitOrder()" disabled class="w-full bg-black text-white py-3.5 rounded-lg hover:bg-gray-800 transition text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed flex justify-center items-center gap-2">
+                <i class="fa-solid fa-lock"></i>
+                <span>กรุณาแนบสลิปเพื่อตรวจสอบ</span>
             </button>
         </div>
     </div>
 
-    <!-- Admin Panel -->
     <div id="adminPanel" class="fixed inset-0 bg-white z-[60] hidden overflow-y-auto">
-        <div class="max-w-4xl mx-auto p-6">
-            <div class="flex justify-between items-center mb-8 border-b pb-4">
-                <h2 class="text-2xl font-semibold">ระบบจัดการหลังบ้าน (Admin)</h2>
-                <button onclick="closeAdmin()" class="text-gray-500 hover:text-black">ปิดหน้าต่าง &times;</button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Settings -->
-                <div class="bg-gray-50 p-6 rounded-lg border">
-                    <h3 class="text-lg font-medium mb-4">ตั้งค่าเว็บแอป</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm mb-1">ลิงก์รูปภาพ Banner (728x90)</label>
-                            <input type="text" id="adminBanner" class="w-full border rounded p-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1">ข้อความประกาศ (Pop-up)</label>
-                            <textarea id="adminPopupText" class="w-full border rounded p-2 text-sm" rows="2"></textarea>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="adminPopupActive">
-                            <label class="text-sm">เปิดใช้งานป้ายประกาศ</label>
-                        </div>
-                        <button onclick="saveAdminSettings()" id="btnSaveSettings" class="bg-black text-white px-4 py-2 rounded text-sm w-full">บันทึกการตั้งค่า</button>
+        <div class="max-w-5xl mx-auto p-6">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center">
+                        <i class="fa-solid fa-sliders text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">ระบบจัดการหลังบ้าน (Admin)</h2>
+                        <p class="text-xs text-gray-500">จัดการข้อมูลร้าน ตั้งค่าแบนเนอร์ ประกาศ และรายการบริการ</p>
                     </div>
                 </div>
+                <button onclick="closeAdmin()" class="text-gray-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
 
-                <!-- Add Service -->
-                <div class="bg-gray-50 p-6 rounded-lg border">
-                    <h3 class="text-lg font-medium mb-4">เพิ่มบริการ / ระบบ</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm mb-1">หมวดหมู่ (เช่น Ministore, Custom)</label>
-                            <input type="text" id="adminCat" class="w-full border rounded p-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1">ชื่อระบบ</label>
-                            <input type="text" id="adminName" class="w-full border rounded p-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1">ราคา (THB)</label>
-                            <input type="number" id="adminPrice" class="w-full border rounded p-2 text-sm">
-                        </div>
-                        <button onclick="saveAdminService()" id="btnSaveService" class="bg-black text-white px-4 py-2 rounded text-sm w-full">เพิ่มบริการ</button>
+            <div class="flex gap-2 border-b border-gray-200 mb-6">
+                <button id="tabBtnServices" onclick="switchAdminTab('services')" class="px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-xs"></i>
+                    <span>จัดการบริการ / ระบบ</span>
+                </button>
+                <button id="tabBtnSettings" onclick="switchAdminTab('settings')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-xs"></i>
+                    <span>ตั้งค่าร้านค้า</span>
+                </button>
+                <button id="tabBtnOrders" onclick="switchAdminTab('orders')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-xs"></i>
+                    <span>รายการสั่งซื้อ</span>
+                </button>
+            </div>
+
+            <div id="tabServices" class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-semibold text-gray-800">รายการบริการทั้งหมด</h3>
+                    <button onclick="openAddServiceModal()" class="bg-black text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-gray-800 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>เพิ่มบริการใหม่</span>
+                    </button>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+                                <th class="p-3.5">ID</th>
+                                <th class="p-3.5">หมวดหมู่</th>
+                                <th class="p-3.5">ชื่อระบบ / บริการ</th>
+                                <th class="p-3.5 text-right">ราคา (THB)</th>
+                                <th class="p-3.5 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminServiceTable" class="divide-y divide-gray-100 text-sm">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabSettings" class="hidden space-y-6">
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-4 max-w-2xl">
+                    <h3 class="text-base font-semibold text-gray-800 mb-2">ตั้งค่า Banner & Pop-up</h3>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ รูปภาพ Banner (ขนาดแนะนำ 728 x 90)</label>
+                        <input type="text" id="adminBanner" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">ข้อความป้ายประกาศ (Pop-up)</label>
+                        <textarea id="adminPopupText" rows="3" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black"></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="adminPopupActive" class="w-4 h-4 text-black rounded border-gray-300 focus:ring-black accent-black">
+                        <label for="adminPopupActive" class="text-sm font-medium text-gray-700">เปิดใช้งานป้ายประกาศ Pop-up เมื่อเข้าหน้าแรก</label>
+                    </div>
+
+                    <div class="pt-3">
+                        <button id="btnSaveSettings" onclick="saveAdminSettings()" class="bg-black text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
+                            <span>บันทึกการตั้งค่า</span>
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <div id="tabOrders" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-semibold text-gray-800">รายการสั่งซื้อย้อนหลัง</h3>
+                    <button onclick="loadAdminOrders()" class="text-xs text-gray-600 hover:text-black flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-md">
+                        <i class="fa-solid fa-rotate-right text-xs"></i>
+                        <span>รีเฟรช</span>
+                    </button>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+                                <th class="p-3.5">รหัสสั่งซื้อ</th>
+                                <th class="p-3.5">วัน-เวลา</th>
+                                <th class="p-3.5">รายการ</th>
+                                <th class="p-3.5 text-right">ยอดรวม</th>
+                                <th class="p-3.5 text-center">สลิป</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminOrderTable" class="divide-y divide-gray-100 text-sm">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400">กดเพื่อโหลดรายการสั่งซื้อ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
         // ==========================================
-        // ตั้งค่า URL ของ GAS (เปลี่ยนเป็น URL ของคุณ)
+        // ตั้งค่า Google Apps Script Web App URL ที่นี่
         // ==========================================
         const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzCKTKv7eKFN4SECKNIuYdIuptucRb-u0o56EjAtR11-TZ-NX0a5CsT0O1QvqqhHdWm/exec';
         const ADMIN_PIN = '0000s';
-        
+
+        let globalServices = [];
         let cart = {};
         let currentTotal = 0;
         let selectedSlipBase64 = null;
         let scannedQRData = null;
 
-        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
         document.addEventListener('DOMContentLoaded', () => {
-            fetchData();
-            
-            // ตรวจสอบการเลือกไฟล์สลิป
+            fetchInitialData();
             document.getElementById('slipInput').addEventListener('change', handleSlipUpload);
         });
 
-        // ฟังก์ชันส่งข้อมูลไปยัง GAS API
         async function fetchAPI(payload) {
             try {
                 const response = await fetch(GAS_API_URL, {
@@ -168,42 +276,45 @@
                 });
                 return await response.json();
             } catch (error) {
-                console.error('Error:', error);
+                console.error('API Error:', error);
                 throw error;
             }
         }
 
-        async function fetchData() {
+        async function fetchInitialData() {
             try {
-                const data = await fetchAPI({ action: 'getInitialData' });
-                if (data.status === 'success') {
-                    renderSettings(data.settings);
-                    renderServices(data.services);
+                const res = await fetchAPI({ action: 'getInitialData' });
+                if (res.status === 'success') {
+                    globalServices = res.services || [];
+                    renderSettings(res.settings || {});
+                    renderServices(globalServices);
+                } else {
+                    showToast('error', res.message || 'ไม่สามารถโหลดข้อมูลได้');
                 }
-            } catch (error) {
-                document.getElementById('serviceContainer').innerHTML = '<div class="col-span-full text-center text-red-500">ไม่สามารถเชื่อมต่อฐานข้อมูลได้</div>';
+            } catch (err) {
+                document.getElementById('serviceContainer').innerHTML = `
+                    <div class="col-span-full text-center py-12 text-red-500 flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                        <span class="text-sm font-medium">ไม่สามารถเชื่อมต่อระบบ API ได้ กรุณาตรวจสอบการตั้งค่า URL</span>
+                    </div>
+                `;
             }
         }
 
         function renderSettings(settings) {
-            // Banner
             if (settings.BannerURL) {
-                const banner = document.getElementById('mainBanner');
-                banner.src = settings.BannerURL;
-                banner.classList.remove('hidden');
+                document.getElementById('mainBanner').src = settings.BannerURL;
             }
-
-            // Popup
             if (settings.PopupActive === 'true' && settings.PopupText) {
                 Swal.fire({
-                    title: 'ประกาศ',
+                    title: 'ประกาศจากร้านค้า',
                     text: settings.PopupText,
-                    confirmButtonText: 'รับทราบ',
-                    confirmButtonColor: '#000'
+                    icon: 'info',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#000000'
                 });
             }
 
-            // นำข้อมูลไปใส่ในหน้า Admin รอไว้
             document.getElementById('adminBanner').value = settings.BannerURL || '';
             document.getElementById('adminPopupText').value = settings.PopupText || '';
             document.getElementById('adminPopupActive').checked = (settings.PopupActive === 'true');
@@ -212,29 +323,43 @@
         function renderServices(services) {
             const container = document.getElementById('serviceContainer');
             container.innerHTML = '';
-            
-            // จัดกลุ่มตาม Category
-            const grouped = services.reduce((acc, curr) => {
-                (acc[curr.category] = acc[curr.category] || []).push(curr);
+
+            if (services.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        <i class="fa-solid fa-inbox text-3xl mb-2"></i>
+                        <p class="text-sm">ยังไม่มีรายการบริการในขณะนี้</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = services.reduce((acc, item) => {
+                const cat = item.category || 'ทั่วไป';
+                (acc[cat] = acc[cat] || []).push(item);
                 return acc;
             }, {});
 
             for (const [category, items] of Object.entries(grouped)) {
                 let html = `
-                    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm h-fit">
-                        <h2 class="text-lg font-medium border-b pb-2 mb-4 text-gray-800">${category}</h2>
-                        <div class="space-y-3">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm h-fit">
+                        <div class="flex items-center gap-2 border-b border-gray-100 pb-3 mb-4">
+                            <i class="fa-solid fa-folder-minus text-xs text-gray-400"></i>
+                            <h2 class="text-base font-bold text-gray-800">${escapeHtml(category)}</h2>
+                        </div>
+                        <div class="space-y-2.5">
                 `;
-                
+
                 items.forEach(item => {
+                    const isChecked = cart[item.id] ? 'checked' : '';
                     html += `
-                        <label class="flex items-center justify-between cursor-pointer p-3 rounded hover:bg-gray-50 transition border border-transparent hover:border-gray-200">
+                        <label class="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:border-gray-300 hover:bg-gray-50/50 transition cursor-pointer group">
                             <div class="flex items-center gap-3">
-                                <input type="checkbox" class="w-4 h-4 text-black border-gray-300 rounded focus:ring-black accent-black" 
-                                    onchange="toggleItem('${item.name}', ${item.price}, this.checked)">
-                                <span class="text-sm">${item.name}</span>
+                                <input type="checkbox" ${isChecked} class="w-4 h-4 text-black border-gray-300 rounded focus:ring-black accent-black"
+                                    onchange="toggleItem('${item.id}', '${escapeHtml(item.name)}', ${item.price}, this.checked)">
+                                <span class="text-sm font-medium text-gray-700 group-hover:text-black">${escapeHtml(item.name)}</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-600">${item.price} ฿</span>
+                            <span class="text-sm font-semibold text-gray-900">${Number(item.price).toLocaleString()} <span class="text-xs text-gray-400 font-normal">฿</span></span>
                         </label>
                     `;
                 });
@@ -244,35 +369,39 @@
             }
         }
 
-        // ระบบตะกร้าคำนวณราคา
-        function toggleItem(name, price, isChecked) {
+        function toggleItem(id, name, price, isChecked) {
             if (isChecked) {
-                cart[name] = price;
+                cart[id] = { name: name, price: price };
             } else {
-                delete cart[name];
+                delete cart[id];
             }
             calculateTotal();
         }
 
         function calculateTotal() {
-            currentTotal = Object.values(cart).reduce((a, b) => a + Number(b), 0);
+            currentTotal = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
             document.getElementById('totalPrice').innerText = currentTotal.toLocaleString();
             document.getElementById('modalTotal').innerText = currentTotal.toLocaleString();
-            
-            const btn = document.getElementById('checkoutBtn');
-            btn.disabled = currentTotal === 0;
+            document.getElementById('checkoutBtn').disabled = (currentTotal === 0);
         }
 
-        // ระบบ Checkout
         function openCheckout() {
             if (currentTotal === 0) return;
+            
+            const listContainer = document.getElementById('modalItemsList');
+            listContainer.innerHTML = '';
+            Object.values(cart).forEach(item => {
+                listContainer.innerHTML += `
+                    <div class="flex justify-between items-center py-1">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-[10px] text-gray-400"></i> ${escapeHtml(item.name)}</span>
+                        <span class="font-medium text-gray-900">${item.price.toLocaleString()} ฿</span>
+                    </div>
+                `;
+            });
+
+            resetSlipInput();
             document.getElementById('checkoutModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
-            // รีเซ็ตไฟล์ input
-            document.getElementById('slipInput').value = '';
-            selectedSlipBase64 = null;
-            scannedQRData = null;
         }
 
         function closeCheckout() {
@@ -280,16 +409,24 @@
             document.body.style.overflow = 'auto';
         }
 
-        // อ่านภาพสลิปและแกะ QR Code 
+        // ==========================================
+        // ระบบประมวลผลสลิป (QR + AI OCR)
+        // ==========================================
         function handleSlipUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
 
+            document.getElementById('fileNameDisplay').innerText = file.name;
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+            document.getElementById('uploadSuccess').classList.remove('hidden');
+            
+            const btn = document.getElementById('confirmOrderBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังตรวจสอบข้อมูลสลิป...</span>';
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 selectedSlipBase64 = event.target.result;
-                
-                // ตรวจสอบ QR ในรูปภาพ
+
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.getElementById('qrCanvas');
@@ -298,20 +435,24 @@
                     canvas.height = img.height;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    
+
+                    // 1. พยายามหา QR Code 
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
                     if (code) {
                         scannedQRData = code.data;
-                        validatePromptPayAmount(scannedQRData);
+                        const qrAmount = extractAmountFromQR(code.data);
+                        
+                        if (qrAmount !== null && !isNaN(qrAmount)) {
+                            // ถ้าระบบเจอตัวเลขใน QR Tag 54 ก็จะตรวจจากยอดตรงนี้ทันที
+                            verifyExactAmount(qrAmount, 'QR Code');
+                        } else {
+                            // ถ้าเจอ QR แต่ข้างในไม่มีจำนวนเงินระบุไว้ (เช่นบางธนาคาร) -> ส่งไปให้ AI อ่านข้อความบนภาพ
+                            scanSlipWithAI(event.target.result);
+                        }
                     } else {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'ไม่พบ QR Code',
-                            text: 'ไม่สามารถอ่าน QR Code บนสลิปได้ โปรดตรวจสอบภาพอีกครั้ง',
-                            confirmButtonColor: '#000'
-                        });
-                        document.getElementById('slipInput').value = '';
-                        selectedSlipBase64 = null;
+                        // ไม่พบ QR Code หรืออ่านไม่ออก -> ส่งไปให้ AI อ่านข้อความบนภาพ
+                        scannedQRData = 'NO_QR';
+                        scanSlipWithAI(event.target.result);
                     }
                 };
                 img.src = event.target.result;
@@ -319,115 +460,198 @@
             reader.readAsDataURL(file);
         }
 
-        // แกะยอดเงินจาก PromptPay Payload (Tag 54)
-        function validatePromptPayAmount(payload) {
-            let amount = 0;
-            try {
-                // โครงสร้าง PromptPay TLV (Tag-Length-Value)
-                // ค้นหา Tag 54 (Transaction Amount)
-                const tag54Index = payload.indexOf('54');
-                if (tag54Index !== -1) {
-                    // อ่านความยาว (2 หลักถัดไป)
-                    const length = parseInt(payload.substring(tag54Index + 2, tag54Index + 4));
-                    // อ่านค่าตามความยาว
-                    const amountStr = payload.substring(tag54Index + 4, tag54Index + 4 + length);
-                    amount = parseFloat(amountStr);
-                }
-            } catch (e) {
-                console.error("Parse Error", e);
-            }
+        function resetSlipInput() {
+            document.getElementById('slipInput').value = '';
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('uploadSuccess').classList.add('hidden');
+            selectedSlipBase64 = null;
+            scannedQRData = null;
+            
+            const btn = document.getElementById('confirmOrderBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span>กรุณาแนบสลิปเพื่อตรวจสอบ</span>';
+        }
 
-            if (amount > 0) {
-                if (amount < currentTotal) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'ยอดเงินไม่ถูกต้อง',
-                        text: `ยอดโอนในสลิป (${amount} บาท) ไม่ตรงกับยอดที่ต้องชำระ (${currentTotal} บาท)`,
-                        confirmButtonColor: '#000'
-                    });
-                    document.getElementById('slipInput').value = '';
-                    selectedSlipBase64 = null;
+        // ดึงยอดเงินจาก QR (PromptPay EMVCo Tag 54)
+        function extractAmountFromQR(payload) {
+            let amount = null;
+            try {
+                let idx = 0;
+                while (idx < payload.length) {
+                    const tag = payload.substring(idx, idx + 2);
+                    const lenStr = payload.substring(idx + 2, idx + 4);
+                    const len = parseInt(lenStr, 10);
+                    if (isNaN(len)) break;
+                    
+                    const val = payload.substring(idx + 4, idx + 4 + len);
+                    if (tag === '54') { 
+                        amount = parseFloat(val);
+                        break;
+                    }
+                    idx += 4 + len;
+                }
+            } catch (err) {
+                console.error('QR Parse Error');
+            }
+            return amount;
+        }
+
+        // 2. ระบบ AI OCR อ่านตัวอักษรและตัวเลขบนสลิปภาพ
+        async function scanSlipWithAI(imageSrc) {
+            const btn = document.getElementById('confirmOrderBtn');
+            btn.innerHTML = '<i class="fa-solid fa-microchip fa-fade"></i> <span>ระบบ AI กำลังแกะตัวเลขจากภาพสลิป...</span>';
+
+            try {
+                const result = await Tesseract.recognize(imageSrc, 'eng+tha', {
+                    logger: m => {} // สามารถใส่ console.log(m) เพื่อดูสถานะการโหลด AI
+                });
+                
+                const text = result.data.text;
+                
+                // ค้นหาเฉพาะกลุ่มตัวเลขที่มีจุดหรือลูกน้ำ เช่น 1,500.00 หรือ 1500
+                const numberRegex = /[\d]+[.,\d]*/g;
+                const matches = text.match(numberRegex);
+                
+                let foundMatch = false;
+                let foundAmount = 0;
+
+                if (matches) {
+                    for (let match of matches) {
+                        // นำลูกน้ำออกเพื่อให้ parseFloat อ่านได้ถูกต้อง
+                        let cleanNum = match.replace(/,/g, '');
+                        // หากมีจุดต่อท้าย ให้ลบออก
+                        if (cleanNum.endsWith('.')) cleanNum = cleanNum.slice(0, -1);
+                        
+                        let parsedValue = parseFloat(cleanNum);
+                        if (parsedValue === currentTotal) {
+                            foundMatch = true;
+                            foundAmount = parsedValue;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundMatch) {
+                    verifyExactAmount(foundAmount, 'AI สแกนภาพ');
                 } else {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'ตรวจสอบสลิปสำเร็จ',
-                        text: `ยอดเงินถูกต้อง (${amount} บาท)`,
-                        confirmButtonColor: '#000',
-                        timer: 2000,
-                        showConfirmButton: false
+                        title: 'ยอดชำระเงินไม่ถูกต้อง',
+                        text: `AI ไม่พบตัวเลขยอดเงิน ${currentTotal.toLocaleString()} THB บนสลิป กรุณาตรวจสอบยอดเงินหรือใช้ภาพที่คมชัดขึ้น`,
+                        icon: 'error',
+                        confirmButtonColor: '#000000'
                     });
+                    resetSlipInput();
                 }
+
+            } catch (error) {
+                Swal.fire({
+                    title: 'ข้อผิดพลาดระบบ AI',
+                    text: 'ไม่สามารถอ่านข้อความบนภาพได้ กรุณาลองใหม่อีกครั้งด้วยสลิปที่ชัดเจนขึ้น',
+                    icon: 'warning',
+                    confirmButtonColor: '#000000'
+                });
+                resetSlipInput();
+            }
+        }
+
+        // 3. ฟังก์ชันตรวจสอบขั้นเด็ดขาด (ปลดล็อกปุ่มเมื่อยอดตรงเป๊ะ)
+        function verifyExactAmount(amount, sourceMethod) {
+            const btn = document.getElementById('confirmOrderBtn');
+
+            if (amount === currentTotal) {
+                Swal.fire({
+                    title: 'ตรวจสอบสำเร็จ',
+                    text: `ยอดชำระเงินตรงกันเป๊ะ (${amount.toLocaleString()} THB) ตรวจจับโดย ${sourceMethod}`,
+                    icon: 'success',
+                    confirmButtonColor: '#000000',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                // ปลดล็อกให้กดสั่งซื้อได้
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>ยืนยันคำสั่งซื้อ</span>';
             } else {
                 Swal.fire({
-                    icon: 'info',
-                    title: 'สลิปนี้ไม่มียอดเงินในคิวอาร์',
-                    text: 'ระบบจะส่งให้ Admin ตรวจสอบด้วยตนเอง',
-                    confirmButtonColor: '#000'
+                    title: 'ยอดชำระเงินไม่ถูกต้อง',
+                    text: `ยอดที่อ่านได้: ${amount.toLocaleString()} THB | ยอดที่ต้องชำระจริง: ${currentTotal.toLocaleString()} THB`,
+                    icon: 'error',
+                    confirmButtonColor: '#000000'
                 });
+                resetSlipInput();
             }
         }
 
         async function submitOrder() {
-            if (!selectedSlipBase64) {
-                Swal.fire('แจ้งเตือน', 'กรุณาอัปโหลดสลิปโอนเงิน', 'warning');
-                return;
-            }
-
             const btn = document.getElementById('confirmOrderBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="loader"></span> กำลังดำเนินการ...';
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึกข้อมูล...</span>`;
 
-            const itemsStr = Object.keys(cart).join(', ');
+            const itemNames = Object.values(cart).map(i => i.name).join(', ');
 
             const payload = {
                 action: 'checkout',
-                items: itemsStr,
+                items: itemNames,
                 total: currentTotal,
                 slipBase64: selectedSlipBase64,
-                qrData: scannedQRData
+                qrData: scannedQRData || 'NO_QR'
             };
 
             try {
-                const response = await fetchAPI(payload);
-                if (response.status === 'success') {
+                const res = await fetchAPI(payload);
+                if (res.status === 'success') {
                     Swal.fire({
+                        title: 'สั่งซื้อสำเร็จ',
+                        text: `รหัสการสั่งซื้อ: ${res.orderId}`,
                         icon: 'success',
-                        title: 'สั่งซื้อสำเร็จ!',
-                        text: `รหัสรายการ: ${response.orderId}`,
-                        confirmButtonColor: '#000'
+                        confirmButtonColor: '#000000'
                     }).then(() => {
                         window.location.reload();
                     });
                 } else {
-                    Swal.fire('ข้อผิดพลาด', response.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'ยืนยันการสั่งซื้อ';
+                    Swal.fire({
+                        title: 'เกิดข้อผิดพลาด',
+                        text: res.message, // "สลิปนี้ถูกใช้งานไปแล้ว..."
+                        icon: 'error',
+                        confirmButtonColor: '#000000'
+                    });
+                    resetSlipInput();
                 }
-            } catch (error) {
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+            } catch (err) {
+                Swal.fire({
+                    title: 'เชื่อมต่อล้มเหลว',
+                    text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                    icon: 'error',
+                    confirmButtonColor: '#000000'
+                });
                 btn.disabled = false;
-                btn.innerHTML = 'ยืนยันการสั่งซื้อ';
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> <span>ยืนยันคำสั่งซื้อ</span>`;
             }
         }
 
         // ==========================================
-        // Admin ระบบหลังบ้าน
+        // ระบบจัดการหลังบ้าน (Admin)
         // ==========================================
         function promptAdmin() {
             Swal.fire({
-                title: 'เข้าสู่ระบบจัดการ',
+                title: 'เข้าสู่ระบบหลังบ้าน',
                 input: 'password',
-                inputPlaceholder: 'กรอกรหัสผ่าน',
+                inputPlaceholder: 'กรอกรหัสผ่านเข้าใช้งาน',
                 showCancelButton: true,
                 confirmButtonText: 'เข้าสู่ระบบ',
                 cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#000'
+                confirmButtonColor: '#000000'
             }).then((result) => {
                 if (result.value === ADMIN_PIN) {
                     document.getElementById('adminPanel').classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
+                    renderAdminServiceTable();
                 } else if (result.value) {
-                    Swal.fire('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง', 'error');
+                    Swal.fire({
+                        title: 'รหัสผ่านไม่ถูกต้อง',
+                        text: 'กรุณาตรวจสอบรหัสผ่านอีกครั้ง',
+                        icon: 'error',
+                        confirmButtonColor: '#000000'
+                    });
                 }
             });
         }
@@ -437,53 +661,263 @@
             document.body.style.overflow = 'auto';
         }
 
-        async function saveAdminSettings() {
-            const btn = document.getElementById('btnSaveSettings');
-            btn.disabled = true;
-            btn.innerHTML = 'กำลังบันทึก...';
+        function switchAdminTab(tabName) {
+            document.getElementById('tabServices').classList.add('hidden');
+            document.getElementById('tabSettings').classList.add('hidden');
+            document.getElementById('tabOrders').classList.add('hidden');
 
-            const payload = {
-                action: 'adminUpdateSettings',
-                bannerUrl: document.getElementById('adminBanner').value,
-                popupText: document.getElementById('adminPopupText').value,
-                popupActive: document.getElementById('adminPopupActive').checked.toString()
-            };
+            document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
+            document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
+            document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
 
-            await fetchAPI(payload);
-            Swal.fire('สำเร็จ', 'บันทึกการตั้งค่าแล้ว', 'success');
-            btn.disabled = false;
-            btn.innerHTML = 'บันทึกการตั้งค่า';
+            if (tabName === 'services') {
+                document.getElementById('tabServices').classList.remove('hidden');
+                document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+                renderAdminServiceTable();
+            } else if (tabName === 'settings') {
+                document.getElementById('tabSettings').classList.remove('hidden');
+                document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+            } else if (tabName === 'orders') {
+                document.getElementById('tabOrders').classList.remove('hidden');
+                document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+                loadAdminOrders();
+            }
         }
 
-        async function saveAdminService() {
-            const cat = document.getElementById('adminCat').value;
-            const name = document.getElementById('adminName').value;
-            const price = document.getElementById('adminPrice').value;
+        function renderAdminServiceTable() {
+            const tbody = document.getElementById('adminServiceTable');
+            tbody.innerHTML = '';
 
-            if (!cat || !name || !price) {
-                Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
+            if (globalServices.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">ยังไม่มีข้อมูลบริการ</td></tr>`;
                 return;
             }
 
-            const btn = document.getElementById('btnSaveService');
+            globalServices.forEach((item) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/80 transition border-b border-gray-100">
+                        <td class="p-3.5 font-mono text-xs text-gray-500">${escapeHtml(item.id)}</td>
+                        <td class="p-3.5 font-medium text-gray-800">${escapeHtml(item.category)}</td>
+                        <td class="p-3.5 text-gray-700">${escapeHtml(item.name)}</td>
+                        <td class="p-3.5 text-right font-semibold text-gray-900">${Number(item.price).toLocaleString()} ฿</td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="openEditServiceModal('${item.id}')" class="p-1.5 text-gray-600 hover:text-black hover:bg-gray-100 rounded transition" title="แก้ไข">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i>
+                            </button>
+                            <button onclick="deleteServiceAction('${item.id}')" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="ลบ">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openAddServiceModal() {
+            Swal.fire({
+                title: 'เพิ่มบริการใหม่',
+                html: `
+                    <div class="space-y-3 text-left mt-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">หมวดหมู่</label>
+                            <input id="swalCat" class="swal2-input !m-0 !w-full text-sm" placeholder="เช่น Ministore, Custom">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อระบบ / บริการ</label>
+                            <input id="swalName" class="swal2-input !m-0 !w-full text-sm" placeholder="เช่น ระบบชำระเงิน">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ราคา (THB)</label>
+                            <input id="swalPrice" type="number" class="swal2-input !m-0 !w-full text-sm" placeholder="1000">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#000000',
+                preConfirm: () => {
+                    const cat = document.getElementById('swalCat').value.trim();
+                    const name = document.getElementById('swalName').value.trim();
+                    const price = document.getElementById('swalPrice').value.trim();
+
+                    if (!cat || !name || !price) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+                        return false;
+                    }
+                    return { category: cat, name: name, price: price };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    const res = await fetchAPI({ action: 'adminAddService', ...result.value });
+                    if (res.status === 'success') {
+                        showToast('success', 'เพิ่มบริการเรียบร้อย');
+                        await fetchInitialData();
+                        renderAdminServiceTable();
+                    } else {
+                        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
+                    }
+                }
+            });
+        }
+
+        function openEditServiceModal(id) {
+            const service = globalServices.find(s => s.id === id);
+            if (!service) return;
+
+            Swal.fire({
+                title: 'แก้ไขรายการบริการ',
+                html: `
+                    <div class="space-y-3 text-left mt-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">หมวดหมู่</label>
+                            <input id="swalEditCat" class="swal2-input !m-0 !w-full text-sm" value="${escapeHtml(service.category)}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อระบบ / บริการ</label>
+                            <input id="swalEditName" class="swal2-input !m-0 !w-full text-sm" value="${escapeHtml(service.name)}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ราคา (THB)</label>
+                            <input id="swalEditPrice" type="number" class="swal2-input !m-0 !w-full text-sm" value="${service.price}">
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'อัปเดต',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#000000',
+                preConfirm: () => {
+                    const cat = document.getElementById('swalEditCat').value.trim();
+                    const name = document.getElementById('swalEditName').value.trim();
+                    const price = document.getElementById('swalEditPrice').value.trim();
+
+                    if (!cat || !name || !price) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+                        return false;
+                    }
+                    return { id: id, category: cat, name: name, price: price };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'กำลังอัปเดต...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    const res = await fetchAPI({ action: 'adminEditService', ...result.value });
+                    if (res.status === 'success') {
+                        showToast('success', 'อัปเดตรายการเรียบร้อย');
+                        await fetchInitialData();
+                        renderAdminServiceTable();
+                    } else {
+                        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
+                    }
+                }
+            });
+        }
+
+        function deleteServiceAction(id) {
+            Swal.fire({
+                title: 'ยืนยันการลบรายการ',
+                text: 'คุณต้องการลบรายการบริการนี้ใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ลบรายการ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#DC2626'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    const res = await fetchAPI({ action: 'adminDeleteService', id: id });
+                    if (res.status === 'success') {
+                        showToast('success', 'ลบรายการเรียบร้อย');
+                        await fetchInitialData();
+                        renderAdminServiceTable();
+                    } else {
+                        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
+                    }
+                }
+            });
+        }
+
+        async function saveAdminSettings() {
+            const btn = document.getElementById('btnSaveSettings');
             btn.disabled = true;
-            btn.innerHTML = 'กำลังบันทึก...';
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึก...</span>`;
 
             const payload = {
-                action: 'adminAddService',
-                category: cat,
-                name: name,
-                price: price
+                action: 'adminUpdateSettings',
+                bannerUrl: document.getElementById('adminBanner').value.trim(),
+                popupText: document.getElementById('adminPopupText').value.trim(),
+                popupActive: document.getElementById('adminPopupActive').checked.toString()
             };
 
-            await fetchAPI(payload);
-            Swal.fire('สำเร็จ', 'เพิ่มบริการเรียบร้อย รีเฟรชหน้าเว็บเพื่อดูผลลัพธ์', 'success');
-            
-            document.getElementById('adminName').value = '';
-            document.getElementById('adminPrice').value = '';
-            
-            btn.disabled = false;
-            btn.innerHTML = 'เพิ่มบริการ';
+            try {
+                const res = await fetchAPI(payload);
+                if (res.status === 'success') {
+                    showToast('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
+                    document.getElementById('mainBanner').src = payload.bannerUrl || 'https://via.placeholder.com/728x90';
+                } else {
+                    Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
+                }
+            } catch (err) {
+                Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกการตั้งค่าได้', icon: 'error', confirmButtonColor: '#000000' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> <span>บันทึกการตั้งค่า</span>`;
+            }
+        }
+
+        async function loadAdminOrders() {
+            const tbody = document.getElementById('adminOrderTable');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดรายการ...</td></tr>`;
+
+            try {
+                const res = await fetchAPI({ action: 'adminGetOrders' });
+                if (res.status === 'success') {
+                    const orders = res.orders || [];
+                    if (orders.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">ยังไม่มีรายการสั่งซื้อ</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    orders.reverse().forEach((ord) => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-gray-50/80 transition border-b border-gray-100">
+                                <td class="p-3.5 font-mono text-xs font-semibold text-gray-800">${escapeHtml(ord.orderId)}</td>
+                                <td class="p-3.5 text-xs text-gray-500">${escapeHtml(ord.timestamp)}</td>
+                                <td class="p-3.5 text-gray-700 max-w-xs truncate">${escapeHtml(ord.items)}</td>
+                                <td class="p-3.5 text-right font-semibold text-gray-900">${Number(ord.total).toLocaleString()} ฿</td>
+                                <td class="p-3.5 text-center">
+                                    ${ord.slipUrl ? `<a href="${ord.slipUrl}" target="_blank" class="text-xs text-gray-700 underline hover:text-black flex items-center justify-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> เปิดดูสลิป</a>` : '-'}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-red-500">ไม่สามารถโหลดข้อมูลคำสั่งซื้อได้</td></tr>`;
+            }
+        }
+
+        function showToast(icon, title) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: icon,
+                title: title,
+                showConfirmButton: false,
+                timer: 2500
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>
