@@ -19,24 +19,25 @@
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
         
-        /* เลเซอร์อนิเมชัน โทนพาสเทลชมพู-ฟ้า */
+        /* เลเซอร์อนิเมชัน โทนพาสเทลชมพู-ฟ้า (อัปเดตแก้กระตุก) */
         .laser-box {
             position: relative;
             border-radius: 1.25rem;
-            overflow: hidden;
             z-index: 1;
             padding: 3px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             background: #fff;
+            overflow: hidden;
         }
         .laser-box::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent 60%, #F472B6 80%, #38BDF8 100%);
-            animation: rotateLaser 4s linear infinite;
+            top: -100%; left: -100%;
+            width: 300%; height: 300%;
+            background: conic-gradient(transparent, rgba(244, 114, 182, 0.8), rgba(56, 189, 248, 0.8), transparent 30%);
+            animation: rotateLaser 3s linear infinite;
             z-index: -2;
+            will-change: transform;
         }
         .laser-box::after {
             content: '';
@@ -47,12 +48,12 @@
             z-index: -1;
         }
         @keyframes rotateLaser {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            from { transform: rotate(0turn); }
+            to { transform: rotate(1turn); }
         }
         
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative pb-32">
@@ -130,7 +131,7 @@
                     <i class="fa-solid fa-cubes text-xs"></i><span>จัดการบริการ / ระบบ</span>
                 </button>
                 <button id="tabBtnSettings" onclick="switchAdminTab('settings')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-gear text-xs"></i><span>ตั้งค่าและจัดเรียงหมวดหมู่</span>
+                    <i class="fa-solid fa-gear text-xs"></i><span>ตั้งค่าและจัดเรียงขั้นตอน</span>
                 </button>
                 <button id="tabBtnOrders" onclick="switchAdminTab('orders')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition whitespace-nowrap">
                     <i class="fa-solid fa-list-check text-xs"></i><span>รายการสั่งซื้อ</span>
@@ -276,16 +277,18 @@
         let globalServices = [];
         let globalSettings = {};
         let currentCategoryOrder = [];
-        let wizardSteps = []; // จะเก็บชื่อขั้นตอนทั้งหมดรวม สรุป
+        let wizardSteps = []; // เก็บลำดับขั้นตอนทั้งหมด
         let currentStepIndex = 0;
         
         let cart = {};
         let currentTotal = 0;
         let selectedSlipBase64 = null;
         let scannedQRData = null;
+        let slipVerified = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchInitialData();
+            document.getElementById('slipInput').addEventListener('change', handleSlipUpload);
         });
 
         async function fetchAPI(payload) {
@@ -351,14 +354,10 @@
 
             currentCategoryOrder = [];
             savedOrder.forEach(cat => {
-                if (uniqueCats.includes(cat)) {
-                    currentCategoryOrder.push(cat);
-                }
+                if (uniqueCats.includes(cat)) currentCategoryOrder.push(cat);
             });
             uniqueCats.forEach(cat => {
-                if (!currentCategoryOrder.includes(cat)) {
-                    currentCategoryOrder.push(cat);
-                }
+                if (!currentCategoryOrder.includes(cat)) currentCategoryOrder.push(cat);
             });
 
             wizardSteps = [...currentCategoryOrder, 'สรุป'];
@@ -397,15 +396,15 @@
         }
 
         // ==========================================
-        // WIZARD UI (STEP-BY-STEP)
+        // WIZARD UI (STEP-BY-STEP) + DROPDOWN
         // ==========================================
         function renderWizardUI() {
             const stepperContainer = document.getElementById('stepperContainer');
             const contentContainer = document.getElementById('stepsContentContainer');
             
-            // 1. Render Stepper Header
+            // 1. Render Stepper
             let stepperHTML = '<div class="flex items-center justify-between w-full relative">';
-            stepperHTML += '<div class="absolute top-4 left-0 w-full h-0.5 bg-gray-200 -z-10"></div>'; // Connecting line
+            stepperHTML += '<div class="absolute top-4 left-0 w-full h-[1px] bg-gray-200 -z-10"></div>'; 
             
             wizardSteps.forEach((stepName, index) => {
                 stepperHTML += `
@@ -413,14 +412,14 @@
                         <div class="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all border-2 bg-white text-gray-400 border-gray-200 stepper-circle">
                             ${index + 1}
                         </div>
-                        <span class="text-[10px] sm:text-xs font-medium text-gray-400 text-center leading-tight stepper-label">${escapeHtml(stepName)}</span>
+                        <span class="text-[9px] sm:text-[10px] font-medium text-gray-400 text-center leading-tight stepper-label">${escapeHtml(stepName)}</span>
                     </div>
                 `;
             });
             stepperHTML += '</div>';
             stepperContainer.innerHTML = stepperHTML;
 
-            // 2. Render Content Sections
+            // 2. Render Steps Content
             contentContainer.innerHTML = '';
             const grouped = globalServices.reduce((acc, item) => {
                 const cat = item.category || 'ทั่วไป';
@@ -439,38 +438,36 @@
                     stepHtml += `
                         <div class="text-center mb-6">
                             <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Step ${index + 1} : ${escapeHtml(stepName)}</h2>
-                            <p class="text-xs text-gray-500 mt-1">เลือกรายการที่ตรงกับความต้องการของคุณ</p>
+                            <p class="text-xs text-gray-500 mt-1">เลือกรายการแล้วกดปุ่มเพิ่มลงตะกร้า</p>
                         </div>
-                        <div class="laser-box max-w-2xl mx-auto w-full">
-                            <div class="relative z-10 p-4 sm:p-5 w-full bg-white/50 backdrop-blur-sm rounded-[1.1rem]">
-                                <div class="space-y-3">
-                    `;
-
-                    if (items.length === 0) {
-                        stepHtml += `<p class="text-center text-sm text-gray-400 py-6">ยังไม่มีบริการในหมวดหมู่นี้</p>`;
-                    }
-
-                    items.forEach(item => {
-                        const isChecked = cart[item.id] ? 'checked' : '';
-                        stepHtml += `
-                            <label class="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm transition cursor-pointer group">
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" id="chk-${item.id}" ${isChecked} class="w-5 h-5 text-black border-gray-300 rounded focus:ring-black accent-black"
-                                        onchange="toggleItem('${item.id}', '${escapeHtml(item.name)}', ${item.price}, this.checked)">
-                                    <span class="text-sm font-medium text-gray-700 group-hover:text-black">${escapeHtml(item.name)}</span>
+                        <div class="laser-box max-w-xl mx-auto w-full">
+                            <div class="relative z-10 p-5 sm:p-6 w-full rounded-[1.1rem]">
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <select id="select-step-${index}" class="flex-grow border border-gray-300 text-gray-700 rounded-lg p-3 text-sm focus:border-black focus:ring-1 focus:ring-black outline-none bg-gray-50 appearance-none">
+                                        <option value="">-- เลือกรายการที่ต้องการ --</option>
+                                        ${items.map(item => `<option value="${item.id}">${escapeHtml(item.name)} (+${Number(item.price).toLocaleString()} ฿)</option>`).join('')}
+                                    </select>
+                                    <button onclick="addServiceToCart(${index})" class="bg-black text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center justify-center gap-2 whitespace-nowrap shadow-sm">
+                                        <i class="fa-solid fa-plus text-xs"></i> เพิ่ม
+                                    </button>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-900">${Number(item.price).toLocaleString()} <span class="text-[10px] text-gray-400 font-normal">THB</span></span>
-                            </label>
-                        `;
-                    });
+                                
+                                <div class="mt-6 pt-5 border-t border-gray-100">
+                                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-basket-shopping"></i> รายการที่เลือกไว้</p>
+                                    <div id="selected-list-${index}" class="space-y-2 min-h-[50px]">
+                                        </div>
+                                </div>
 
-                    stepHtml += `</div></div></div>`;
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    // Summary Step Checkout UI
+                    // Summary Step UI
                     stepHtml += `
                         <div class="text-center mb-6">
-                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Step ${index + 1} : สรุปรายการชำระเงิน</h2>
-                            <p class="text-xs text-gray-500 mt-1">สแกน QR Code และแนบสลิป ระบบจะตรวจสอบอัตโนมัติ</p>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Step ${index + 1} : สรุปรายการ</h2>
+                            <p class="text-xs text-gray-500 mt-1">ตรวจสอบความถูกต้องและชำระเงินเพื่อยืนยัน</p>
                         </div>
                         <div class="max-w-md mx-auto w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
                             
@@ -483,19 +480,19 @@
                             </div>
 
                             <div class="mb-5">
-                                <label class="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">รายการที่เลือกทั้งหมด</label>
+                                <label class="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">รายการทั้งหมด</label>
                                 <div id="summaryItemsList" class="space-y-1.5 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 max-h-40 overflow-y-auto custom-scrollbar">
-                                    </div>
+                                </div>
                             </div>
 
                             <div>
-                                <label class="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">แนบหลักฐานการโอนเงิน (สลิป)</label>
+                                <label class="block text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">แนบหลักฐานโอนเงิน</label>
                                 <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-gray-400 transition bg-gray-50 relative">
                                     <input type="file" id="slipInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                                     <div id="uploadPlaceholder" class="flex flex-col items-center gap-1.5 text-gray-500">
                                         <i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-400"></i>
-                                        <span class="text-xs font-medium">คลิกเพื่อเลือกภาพสลิปของคุณ</span>
-                                        <span class="text-[9px] text-gray-400">ระบบ AI อัจฉริยะจะทำการแกะยอดเงินตรวจสอบอัตโนมัติ</span>
+                                        <span class="text-xs font-medium">คลิกเพื่อเลือกภาพสลิป</span>
+                                        <span class="text-[9px] text-gray-400">ระบบ AI จะตรวจสอบยอดเงินอัตโนมัติ</span>
                                     </div>
                                     <div id="uploadSuccess" class="hidden flex items-center justify-center gap-2 text-gray-800 font-medium text-xs">
                                         <i class="fa-solid fa-file-circle-check text-xl text-green-500"></i>
@@ -511,7 +508,6 @@
                 contentContainer.innerHTML += stepHtml;
             });
             
-            // ผูก Event Listener ใหม่
             const slipEl = document.getElementById('slipInput');
             if(slipEl) slipEl.addEventListener('change', handleSlipUpload);
 
@@ -519,8 +515,66 @@
             updateWizardState();
         }
 
+        // Functions for Dropdown List Cart System
+        function addServiceToCart(stepIndex) {
+            const select = document.getElementById(`select-step-${stepIndex}`);
+            const selectedId = select.value;
+            
+            if (!selectedId) {
+                Swal.fire({ title: 'ยังไม่ได้เลือกบริการ', text: 'กรุณาเลือกรายการจากเมนูก่อนกดเพิ่ม', icon: 'warning', confirmButtonColor: '#000' });
+                return;
+            }
+
+            const service = globalServices.find(s => s.id === selectedId);
+            if (service) {
+                if (cart[service.id]) {
+                    showToast('info', 'รายการนี้มีอยู่ในตะกร้าแล้ว');
+                    return;
+                }
+                cart[service.id] = { name: service.name, price: Number(service.price), stepIndex: stepIndex };
+                select.value = ''; 
+                calculateTotal();
+                renderSelectedListForStep(stepIndex);
+                showToast('success', 'เพิ่มลงตะกร้าแล้ว');
+            }
+        }
+
+        function removeServiceFromCart(id, stepIndex) {
+            if (cart[id]) {
+                delete cart[id];
+                calculateTotal();
+                renderSelectedListForStep(stepIndex);
+            }
+        }
+
+        function renderSelectedListForStep(stepIndex) {
+            const listContainer = document.getElementById(`selected-list-${stepIndex}`);
+            if (!listContainer) return;
+
+            const itemsInStep = Object.entries(cart).filter(([id, data]) => data.stepIndex === stepIndex);
+
+            if (itemsInStep.length === 0) {
+                listContainer.innerHTML = `<div class="text-center p-4 border border-dashed border-gray-200 rounded-xl text-gray-400 text-xs">ยังไม่มีรายการที่เลือก</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = itemsInStep.map(([id, data]) => `
+                <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-white shadow-sm animate-fade-in">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+                        <span class="text-sm font-medium text-gray-800">${escapeHtml(data.name)}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-semibold text-gray-900">${data.price.toLocaleString()} ฿</span>
+                        <button onclick="removeServiceFromCart('${id}', ${stepIndex})" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-50 border border-red-100 text-red-500 hover:bg-red-500 hover:text-white transition">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function updateWizardState() {
-            // Update UI Step Indicators
             wizardSteps.forEach((_, index) => {
                 const tab = document.getElementById(`stepper-tab-${index}`);
                 const circle = tab.querySelector('.stepper-circle');
@@ -528,25 +582,24 @@
                 
                 if (index === currentStepIndex) {
                     circle.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all border-2 bg-[#F472B6] text-white border-[#F472B6] stepper-circle shadow-md";
-                    label.className = "text-[10px] sm:text-xs font-bold text-gray-900 text-center leading-tight stepper-label";
+                    label.className = "text-[9px] sm:text-[10px] font-bold text-gray-900 text-center leading-tight stepper-label mt-1";
                 } else if (index < currentStepIndex) {
                     circle.className = "w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all border-2 bg-black text-white border-black stepper-circle";
-                    label.className = "text-[10px] sm:text-xs font-medium text-gray-700 text-center leading-tight stepper-label";
+                    label.className = "text-[9px] sm:text-[10px] font-medium text-gray-700 text-center leading-tight stepper-label mt-1";
                 } else {
                     circle.className = "w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all border-2 bg-white text-gray-400 border-gray-200 stepper-circle";
-                    label.className = "text-[10px] sm:text-xs font-medium text-gray-400 text-center leading-tight stepper-label";
+                    label.className = "text-[9px] sm:text-[10px] font-medium text-gray-400 text-center leading-tight stepper-label mt-1";
                 }
                 
-                // Hide/Show Content
                 const content = document.getElementById(`step-content-${index}`);
                 if (index === currentStepIndex) {
                     content.classList.remove('hidden');
+                    if (index < wizardSteps.length - 1) renderSelectedListForStep(index);
                 } else {
                     content.classList.add('hidden');
                 }
             });
 
-            // Update Bottom Bar Buttons
             const btnPrev = document.getElementById('btnPrevStep');
             const btnNext = document.getElementById('btnNextStep');
             const nextText = document.getElementById('nextBtnText');
@@ -555,13 +608,11 @@
             btnPrev.disabled = (currentStepIndex === 0);
 
             if (currentStepIndex === wizardSteps.length - 1) {
-                // อยู่หน้าสรุป
-                nextText.innerText = "ยืนยันการสั่งซื้อ";
+                nextText.innerText = "ยืนยันสั่งซื้อ";
                 nextIcon.className = "fa-solid fa-check text-xs";
-                // เช็คว่าสแกนสลิปผ่านหรือยัง
                 if (!selectedSlipBase64 || (scannedQRData === null && !slipVerified)) {
                     btnNext.disabled = true;
-                    nextText.innerText = "รอตรวจสอบสลิป";
+                    nextText.innerText = "รอสลิป";
                     nextIcon.className = "fa-solid fa-lock text-xs";
                 } else {
                     btnNext.disabled = false;
@@ -600,19 +651,9 @@
             }
         }
 
-        function toggleItem(id, name, price, isChecked) {
-            if (isChecked) {
-                cart[id] = { name: name, price: price };
-            } else {
-                delete cart[id];
-            }
-            calculateTotal();
-        }
-
         function calculateTotal() {
             currentTotal = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
             document.getElementById('totalPrice').innerText = currentTotal.toLocaleString();
-            // ถ้ายอดเป็น 0 และไปถึงหน้าสรุป จะรีเซ็ตสลิป
             if(currentStepIndex === wizardSteps.length - 1) {
                 resetSlipInput();
                 updateWizardState();
@@ -633,7 +674,7 @@
             items.forEach(item => {
                 listContainer.innerHTML += `
                     <div class="flex justify-between items-center py-1.5 border-b border-gray-100 last:border-0">
-                        <span class="flex items-center gap-1.5 text-xs"><i class="fa-solid fa-circle-check text-[10px] text-black"></i> ${escapeHtml(item.name)}</span>
+                        <span class="flex items-center gap-1.5 text-xs"><i class="fa-solid fa-circle-check text-[10px] text-green-500"></i> ${escapeHtml(item.name)}</span>
                         <span class="font-semibold text-gray-900 text-xs">${item.price.toLocaleString()} ฿</span>
                     </div>
                 `;
@@ -643,8 +684,6 @@
         // ==========================================
         // ระบบประมวลผลสลิป (QR + AI OCR)
         // ==========================================
-        let slipVerified = false; // ตัวแปรเช็คสถานะการตรวจสอบสลิป
-
         function handleSlipUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -660,7 +699,7 @@
             document.getElementById('uploadSuccess').classList.remove('hidden');
             
             const btn = document.getElementById('btnNextStep');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังตรวจสอบ...</span>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>ตรวจสอบ...</span>';
             btn.disabled = true;
 
             const reader = new FileReader();
@@ -682,7 +721,7 @@
                         const qrAmount = extractAmountFromQR(code.data);
                         
                         if (qrAmount !== null && !isNaN(qrAmount)) {
-                            verifyExactAmount(qrAmount, 'ข้อมูลใน QR Code');
+                            verifyExactAmount(qrAmount, 'QR Code');
                         } else {
                             scanSlipWithAI(event.target.result);
                         }
@@ -728,15 +767,13 @@
                     }
                     idx += 4 + len;
                 }
-            } catch (err) {
-                console.error('QR Parse Error');
-            }
+            } catch (err) { }
             return amount;
         }
 
         async function scanSlipWithAI(imageSrc) {
             const btn = document.getElementById('btnNextStep');
-            btn.innerHTML = '<i class="fa-solid fa-microchip fa-fade"></i> <span>AI กำลังแกะยอดเงิน...</span>';
+            btn.innerHTML = '<i class="fa-solid fa-microchip fa-fade"></i> <span>AI สแกนสลิป...</span>';
 
             try {
                 const result = await Tesseract.recognize(imageSrc, 'eng+tha', { logger: m => {} });
@@ -762,11 +799,11 @@
                 }
 
                 if (foundMatch) {
-                    verifyExactAmount(foundAmount, 'AI สแกนภาพสลิป');
+                    verifyExactAmount(foundAmount, 'AI OCR');
                 } else {
                     Swal.fire({
-                        title: 'ยอดชำระเงินไม่ถูกต้อง',
-                        text: `AI ไม่พบตัวเลขยอดเงิน ${currentTotal.toLocaleString()} THB บนสลิป กรุณาตรวจสอบยอดเงินให้ตรงกับบิล`,
+                        title: 'ยอดชำระไม่ถูกต้อง',
+                        text: `ระบบไม่พบตัวเลขยอดเงิน ${currentTotal.toLocaleString()} THB บนสลิป กรุณาตรวจสอบให้ตรงกัน`,
                         icon: 'error',
                         confirmButtonColor: '#000000'
                     });
@@ -787,19 +824,19 @@
             if (amount === currentTotal) {
                 Swal.fire({
                     title: 'ตรวจสอบสำเร็จ',
-                    text: `ยอดโอนถูกต้อง (${amount.toLocaleString()} THB) ตรวจพบโดย ${sourceMethod}`,
+                    text: `ยอดโอนถูกต้องเป๊ะ (${amount.toLocaleString()} THB) ตรวจโดย ${sourceMethod}`,
                     icon: 'success',
                     confirmButtonColor: '#000000',
-                    timer: 2500,
+                    timer: 2000,
                     showConfirmButton: false
                 });
-                document.getElementById('fileNameDisplay').innerText = "สลิปผ่านการตรวจสอบแล้ว";
+                document.getElementById('fileNameDisplay').innerText = "ตรวจสอบผ่านแล้ว";
                 slipVerified = true;
                 updateWizardState();
             } else {
                 Swal.fire({
-                    title: 'ยอดชำระเงินไม่ถูกต้อง',
-                    text: `ยอดที่อ่านได้: ${amount.toLocaleString()} THB | ยอดที่ต้องชำระจริง: ${currentTotal.toLocaleString()} THB`,
+                    title: 'ยอดชำระไม่ถูกต้อง',
+                    text: `ยอดในสลิป: ${amount.toLocaleString()} THB | ยอดจริง: ${currentTotal.toLocaleString()} THB`,
                     icon: 'error',
                     confirmButtonColor: '#000000'
                 });
@@ -810,45 +847,21 @@
         async function submitOrder() {
             const btn = document.getElementById('btnNextStep');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึกข้อมูล...</span>`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึก...</span>`;
 
             const itemNames = Object.values(cart).map(i => i.name).join(', ');
-
-            const payload = {
-                action: 'checkout',
-                items: itemNames,
-                total: currentTotal,
-                slipBase64: selectedSlipBase64,
-                qrData: scannedQRData || 'NO_QR'
-            };
+            const payload = { action: 'checkout', items: itemNames, total: currentTotal, slipBase64: selectedSlipBase64, qrData: scannedQRData || 'NO_QR' };
 
             try {
                 const res = await fetchAPI(payload);
                 if (res.status === 'success') {
-                    Swal.fire({
-                        title: 'สั่งซื้อสำเร็จ',
-                        text: `รหัสการสั่งซื้อ: ${res.orderId} ขอบคุณที่ใช้บริการครับ`,
-                        icon: 'success',
-                        confirmButtonColor: '#000000'
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    Swal.fire({ title: 'สั่งซื้อสำเร็จ', text: `รหัส: ${res.orderId}`, icon: 'success', confirmButtonColor: '#000000' }).then(() => { window.location.reload(); });
                 } else {
-                    Swal.fire({
-                        title: 'เกิดข้อผิดพลาด',
-                        text: res.message,
-                        icon: 'error',
-                        confirmButtonColor: '#000000'
-                    });
+                    Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
                     resetSlipInput();
                 }
             } catch (err) {
-                Swal.fire({
-                    title: 'เชื่อมต่อล้มเหลว',
-                    text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
-                    icon: 'error',
-                    confirmButtonColor: '#000000'
-                });
+                Swal.fire({ title: 'เชื่อมต่อล้มเหลว', text: 'ไม่สามารถบันทึกได้', icon: 'error', confirmButtonColor: '#000000' });
                 updateWizardState();
             }
         }
@@ -860,7 +873,7 @@
             Swal.fire({
                 title: 'เข้าสู่ระบบหลังบ้าน',
                 input: 'password',
-                inputPlaceholder: 'กรอกรหัสผ่านเข้าใช้งาน',
+                inputPlaceholder: 'กรอกรหัสผ่าน',
                 showCancelButton: true,
                 confirmButtonText: 'เข้าสู่ระบบ',
                 cancelButtonText: 'ยกเลิก',
@@ -876,10 +889,7 @@
             });
         }
 
-        function closeAdmin() {
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+        function closeAdmin() { document.getElementById('adminPanel').classList.add('hidden'); document.body.style.overflow = 'auto'; }
 
         function switchAdminTab(tabName) {
             document.getElementById('tabServices').classList.add('hidden');
@@ -937,7 +947,7 @@
                 select.innerHTML += `<option value="${escapeHtml(cat)}" ${isSelected}>${escapeHtml(cat)}</option>`;
             });
             const isNewSelected = (selectedCategory === 'NEW' || (selectedCategory && !uniqueCats.includes(selectedCategory))) ? 'selected' : '';
-            select.innerHTML += `<option value="NEW" class="font-semibold text-gray-900" ${isNewSelected}>+ เพิ่มขั้นตอน/หมวดหมู่ใหม่...</option>`;
+            select.innerHTML += `<option value="NEW" class="font-semibold text-gray-900" ${isNewSelected}>+ เพิ่มหมวดหมู่ใหม่...</option>`;
             toggleNewCatInput();
         }
 
@@ -997,7 +1007,6 @@
                     showToast('success', 'บันทึกข้อมูลสำเร็จ');
                     closeServiceForm();
                     await fetchInitialData();
-                    renderAdminServiceTable();
                 } else { Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' }); }
             } catch (err) {
                 Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'เชื่อมต่อระบบล้มเหลว', icon: 'error', confirmButtonColor: '#000000' });
@@ -1013,7 +1022,7 @@
                 text: 'คุณต้องการลบรายการนี้ใช่หรือไม่?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'ลบรายการ',
+                confirmButtonText: 'ลบ',
                 cancelButtonText: 'ยกเลิก',
                 confirmButtonColor: '#DC2626'
             }).then(async (result) => {
@@ -1021,9 +1030,8 @@
                     Swal.fire({ title: 'กำลังลบ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     const res = await fetchAPI({ action: 'adminDeleteService', id: id });
                     if (res.status === 'success') {
-                        showToast('success', 'ลบรายการเรียบร้อย');
+                        showToast('success', 'ลบเรียบร้อย');
                         await fetchInitialData();
-                        renderAdminServiceTable();
                     } else { Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' }); }
                 }
             });
@@ -1045,11 +1053,10 @@
             try {
                 const res = await fetchAPI(payload);
                 if (res.status === 'success') {
-                    showToast('success', 'บันทึกการตั้งค่าเรียบร้อยแล้ว');
-                    document.getElementById('mainBanner').src = payload.bannerUrl || 'https://via.placeholder.com/728x90';
+                    showToast('success', 'บันทึกการตั้งค่าสำเร็จ');
                     await fetchInitialData();
                 } else { Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' }); }
-            } catch (err) { Swal.fire({ title: 'ผิดพลาด', text: 'ไม่สามารถบันทึกได้', icon: 'error', confirmButtonColor: '#000000' }); } 
+            } catch (err) { Swal.fire({ title: 'ผิดพลาด', text: 'บันทึกไม่สำเร็จ', icon: 'error', confirmButtonColor: '#000000' }); } 
             finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> <span>บันทึกการตั้งค่าทั้งหมด</span>`;
@@ -1077,7 +1084,7 @@
                                 <td class="p-3.5 text-[11px] text-gray-700 max-w-[200px] truncate">${escapeHtml(ord.items)}</td>
                                 <td class="p-3.5 text-right font-semibold text-gray-900">${Number(ord.total).toLocaleString()} ฿</td>
                                 <td class="p-3.5 text-center">
-                                    ${ord.slipUrl ? `<a href="${ord.slipUrl}" target="_blank" class="text-xs text-gray-700 underline hover:text-black"><i class="fa-solid fa-arrow-up-right-from-square"></i> ดูสลิป</a>` : '-'}
+                                    ${ord.slipUrl ? `<a href="${ord.slipUrl}" target="_blank" class="text-xs text-blue-500 underline hover:text-blue-700"><i class="fa-solid fa-arrow-up-right-from-square"></i> ดูสลิป</a>` : '-'}
                                 </td>
                             </tr>
                         `;
