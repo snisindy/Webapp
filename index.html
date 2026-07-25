@@ -141,21 +141,21 @@
                         <p class="text-xs text-gray-500">จัดการข้อมูลร้าน ตั้งค่าแบนเนอร์ ประกาศ และรายการบริการ</p>
                     </div>
                 </div>
-                <button onclick="closeAdmin()" class="text-gray-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center">
+                <button onclick="closeAdmin()" class="text-gray-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center transition">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
 
             <div class="flex gap-2 border-b border-gray-200 mb-6">
-                <button id="tabBtnServices" onclick="switchAdminTab('services')" class="px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2">
+                <button id="tabBtnServices" onclick="switchAdminTab('services')" class="px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2 transition">
                     <i class="fa-solid fa-cubes text-xs"></i>
                     <span>จัดการบริการ / ระบบ</span>
                 </button>
-                <button id="tabBtnSettings" onclick="switchAdminTab('settings')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2">
+                <button id="tabBtnSettings" onclick="switchAdminTab('settings')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition">
                     <i class="fa-solid fa-gear text-xs"></i>
                     <span>ตั้งค่าร้านค้า</span>
                 </button>
-                <button id="tabBtnOrders" onclick="switchAdminTab('orders')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2">
+                <button id="tabBtnOrders" onclick="switchAdminTab('orders')" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition">
                     <i class="fa-solid fa-list-check text-xs"></i>
                     <span>รายการสั่งซื้อ</span>
                 </button>
@@ -164,7 +164,7 @@
             <div id="tabServices" class="space-y-6">
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-semibold text-gray-800">รายการบริการทั้งหมด</h3>
-                    <button onclick="openAddServiceModal()" class="bg-black text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-gray-800 transition flex items-center gap-2">
+                    <button onclick="openServiceForm()" class="bg-black text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-gray-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>เพิ่มบริการใหม่</span>
                     </button>
@@ -196,12 +196,12 @@
                     
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ รูปภาพ Banner (ขนาดแนะนำ 728 x 90)</label>
-                        <input type="text" id="adminBanner" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black">
+                        <input type="text" id="adminBanner" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition">
                     </div>
 
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">ข้อความป้ายประกาศ (Pop-up)</label>
-                        <textarea id="adminPopupText" rows="3" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black"></textarea>
+                        <textarea id="adminPopupText" rows="3" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition"></textarea>
                     </div>
 
                     <div class="flex items-center gap-2 pt-1">
@@ -221,7 +221,7 @@
             <div id="tabOrders" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-semibold text-gray-800">รายการสั่งซื้อย้อนหลัง</h3>
-                    <button onclick="loadAdminOrders()" class="text-xs text-gray-600 hover:text-black flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-md">
+                    <button onclick="loadAdminOrders()" class="text-xs text-gray-600 hover:text-black flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-md transition">
                         <i class="fa-solid fa-rotate-right text-xs"></i>
                         <span>รีเฟรช</span>
                     </button>
@@ -247,6 +247,42 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <div id="serviceFormModal" class="fixed inset-0 bg-black/60 hidden z-[70] flex justify-center items-center backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+            <button onclick="closeServiceForm()" class="absolute top-4 right-4 text-gray-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="serviceFormTitle" class="text-lg font-bold text-gray-900 mb-5">เพิ่มบริการใหม่</h3>
+            <input type="hidden" id="serviceFormId">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">หมวดหมู่</label>
+                    <select id="serviceFormCatSelect" onchange="toggleNewCatInput()" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition bg-gray-50">
+                        </select>
+                    <input type="text" id="serviceFormCatNew" placeholder="พิมพ์ชื่อหมวดหมู่ใหม่ที่นี่..." class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition mt-2 hidden">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อระบบ / บริการ</label>
+                    <input type="text" id="serviceFormName" placeholder="เช่น ระบบตะกร้าสินค้า" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">ราคา (THB)</label>
+                    <input type="number" id="serviceFormPrice" placeholder="1000" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:border-black transition">
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <button onclick="closeServiceForm()" class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">ยกเลิก</button>
+                <button id="serviceFormSaveBtn" onclick="saveServiceData()" class="px-5 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk text-xs"></i> บันทึกข้อมูล
+                </button>
+            </div>
         </div>
     </div>
 
@@ -443,14 +479,11 @@
                         const qrAmount = extractAmountFromQR(code.data);
                         
                         if (qrAmount !== null && !isNaN(qrAmount)) {
-                            // ถ้าระบบเจอตัวเลขใน QR Tag 54 ก็จะตรวจจากยอดตรงนี้ทันที
                             verifyExactAmount(qrAmount, 'QR Code');
                         } else {
-                            // ถ้าเจอ QR แต่ข้างในไม่มีจำนวนเงินระบุไว้ (เช่นบางธนาคาร) -> ส่งไปให้ AI อ่านข้อความบนภาพ
                             scanSlipWithAI(event.target.result);
                         }
                     } else {
-                        // ไม่พบ QR Code หรืออ่านไม่ออก -> ส่งไปให้ AI อ่านข้อความบนภาพ
                         scannedQRData = 'NO_QR';
                         scanSlipWithAI(event.target.result);
                     }
@@ -472,7 +505,6 @@
             btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span>กรุณาแนบสลิปเพื่อตรวจสอบ</span>';
         }
 
-        // ดึงยอดเงินจาก QR (PromptPay EMVCo Tag 54)
         function extractAmountFromQR(payload) {
             let amount = null;
             try {
@@ -496,19 +528,16 @@
             return amount;
         }
 
-        // 2. ระบบ AI OCR อ่านตัวอักษรและตัวเลขบนสลิปภาพ
         async function scanSlipWithAI(imageSrc) {
             const btn = document.getElementById('confirmOrderBtn');
             btn.innerHTML = '<i class="fa-solid fa-microchip fa-fade"></i> <span>ระบบ AI กำลังแกะตัวเลขจากภาพสลิป...</span>';
 
             try {
                 const result = await Tesseract.recognize(imageSrc, 'eng+tha', {
-                    logger: m => {} // สามารถใส่ console.log(m) เพื่อดูสถานะการโหลด AI
+                    logger: m => {} 
                 });
                 
                 const text = result.data.text;
-                
-                // ค้นหาเฉพาะกลุ่มตัวเลขที่มีจุดหรือลูกน้ำ เช่น 1,500.00 หรือ 1500
                 const numberRegex = /[\d]+[.,\d]*/g;
                 const matches = text.match(numberRegex);
                 
@@ -517,9 +546,7 @@
 
                 if (matches) {
                     for (let match of matches) {
-                        // นำลูกน้ำออกเพื่อให้ parseFloat อ่านได้ถูกต้อง
                         let cleanNum = match.replace(/,/g, '');
-                        // หากมีจุดต่อท้าย ให้ลบออก
                         if (cleanNum.endsWith('.')) cleanNum = cleanNum.slice(0, -1);
                         
                         let parsedValue = parseFloat(cleanNum);
@@ -542,7 +569,6 @@
                     });
                     resetSlipInput();
                 }
-
             } catch (error) {
                 Swal.fire({
                     title: 'ข้อผิดพลาดระบบ AI',
@@ -554,7 +580,6 @@
             }
         }
 
-        // 3. ฟังก์ชันตรวจสอบขั้นเด็ดขาด (ปลดล็อกปุ่มเมื่อยอดตรงเป๊ะ)
         function verifyExactAmount(amount, sourceMethod) {
             const btn = document.getElementById('confirmOrderBtn');
 
@@ -567,7 +592,6 @@
                     timer: 2500,
                     showConfirmButton: false
                 });
-                // ปลดล็อกให้กดสั่งซื้อได้
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>ยืนยันคำสั่งซื้อ</span>';
             } else {
@@ -610,7 +634,7 @@
                 } else {
                     Swal.fire({
                         title: 'เกิดข้อผิดพลาด',
-                        text: res.message, // "สลิปนี้ถูกใช้งานไปแล้ว..."
+                        text: res.message,
                         icon: 'error',
                         confirmButtonColor: '#000000'
                     });
@@ -666,20 +690,20 @@
             document.getElementById('tabSettings').classList.add('hidden');
             document.getElementById('tabOrders').classList.add('hidden');
 
-            document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
-            document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
-            document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2";
+            document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition";
+            document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition";
+            document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-black flex items-center gap-2 transition";
 
             if (tabName === 'services') {
                 document.getElementById('tabServices').classList.remove('hidden');
-                document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+                document.getElementById('tabBtnServices').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2 transition";
                 renderAdminServiceTable();
             } else if (tabName === 'settings') {
                 document.getElementById('tabSettings').classList.remove('hidden');
-                document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+                document.getElementById('tabBtnSettings').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2 transition";
             } else if (tabName === 'orders') {
                 document.getElementById('tabOrders').classList.remove('hidden');
-                document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2";
+                document.getElementById('tabBtnOrders').className = "px-4 py-2 text-sm font-medium border-b-2 border-black text-black flex items-center gap-2 transition";
                 loadAdminOrders();
             }
         }
@@ -700,8 +724,8 @@
                         <td class="p-3.5 font-medium text-gray-800">${escapeHtml(item.category)}</td>
                         <td class="p-3.5 text-gray-700">${escapeHtml(item.name)}</td>
                         <td class="p-3.5 text-right font-semibold text-gray-900">${Number(item.price).toLocaleString()} ฿</td>
-                        <td class="p-3.5 text-center space-x-1">
-                            <button onclick="openEditServiceModal('${item.id}')" class="p-1.5 text-gray-600 hover:text-black hover:bg-gray-100 rounded transition" title="แก้ไข">
+                        <td class="p-3.5 text-center space-x-1 whitespace-nowrap">
+                            <button onclick="openServiceForm('${item.id}')" class="p-1.5 text-gray-600 hover:text-black hover:bg-gray-100 rounded transition" title="แก้ไข">
                                 <i class="fa-solid fa-pen-to-square text-xs"></i>
                             </button>
                             <button onclick="deleteServiceAction('${item.id}')" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition" title="ลบ">
@@ -713,106 +737,114 @@
             });
         }
 
-        function openAddServiceModal() {
-            Swal.fire({
-                title: 'เพิ่มบริการใหม่',
-                html: `
-                    <div class="space-y-3 text-left mt-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">หมวดหมู่</label>
-                            <input id="swalCat" class="swal2-input !m-0 !w-full text-sm" placeholder="เช่น Ministore, Custom">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อระบบ / บริการ</label>
-                            <input id="swalName" class="swal2-input !m-0 !w-full text-sm" placeholder="เช่น ระบบชำระเงิน">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">ราคา (THB)</label>
-                            <input id="swalPrice" type="number" class="swal2-input !m-0 !w-full text-sm" placeholder="1000">
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#000000',
-                preConfirm: () => {
-                    const cat = document.getElementById('swalCat').value.trim();
-                    const name = document.getElementById('swalName').value.trim();
-                    const price = document.getElementById('swalPrice').value.trim();
+        // ==========================================
+        // ระบบฟอร์มเพิ่ม/แก้ไข สินค้าแบบใหม่ (Easy Form)
+        // ==========================================
+        function populateCategoryDropdown(selectedCategory = '') {
+            const select = document.getElementById('serviceFormCatSelect');
+            select.innerHTML = '';
 
-                    if (!cat || !name || !price) {
-                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
-                        return false;
-                    }
-                    return { category: cat, name: name, price: price };
-                }
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    const res = await fetchAPI({ action: 'adminAddService', ...result.value });
-                    if (res.status === 'success') {
-                        showToast('success', 'เพิ่มบริการเรียบร้อย');
-                        await fetchInitialData();
-                        renderAdminServiceTable();
-                    } else {
-                        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
-                    }
-                }
+            // ดึงหมวดหมู่ที่ไม่ซ้ำกัน
+            const uniqueCats = [...new Set(globalServices.map(s => s.category).filter(c => c))];
+            
+            uniqueCats.forEach(cat => {
+                const isSelected = (cat === selectedCategory) ? 'selected' : '';
+                select.innerHTML += `<option value="${escapeHtml(cat)}" ${isSelected}>${escapeHtml(cat)}</option>`;
             });
+
+            // เพิ่มตัวเลือกสร้างหมวดหมู่ใหม่ต่อท้าย
+            const isNewSelected = (selectedCategory === 'NEW' || (selectedCategory && !uniqueCats.includes(selectedCategory))) ? 'selected' : '';
+            select.innerHTML += `<option value="NEW" class="font-semibold text-gray-900" ${isNewSelected}>+ เพิ่มหมวดหมู่ใหม่...</option>`;
+
+            toggleNewCatInput();
         }
 
-        function openEditServiceModal(id) {
-            const service = globalServices.find(s => s.id === id);
-            if (!service) return;
-
-            Swal.fire({
-                title: 'แก้ไขรายการบริการ',
-                html: `
-                    <div class="space-y-3 text-left mt-2">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">หมวดหมู่</label>
-                            <input id="swalEditCat" class="swal2-input !m-0 !w-full text-sm" value="${escapeHtml(service.category)}">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">ชื่อระบบ / บริการ</label>
-                            <input id="swalEditName" class="swal2-input !m-0 !w-full text-sm" value="${escapeHtml(service.name)}">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">ราคา (THB)</label>
-                            <input id="swalEditPrice" type="number" class="swal2-input !m-0 !w-full text-sm" value="${service.price}">
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'อัปเดต',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#000000',
-                preConfirm: () => {
-                    const cat = document.getElementById('swalEditCat').value.trim();
-                    const name = document.getElementById('swalEditName').value.trim();
-                    const price = document.getElementById('swalEditPrice').value.trim();
-
-                    if (!cat || !name || !price) {
-                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
-                        return false;
-                    }
-                    return { id: id, category: cat, name: name, price: price };
-                }
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({ title: 'กำลังอัปเดต...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                    const res = await fetchAPI({ action: 'adminEditService', ...result.value });
-                    if (res.status === 'success') {
-                        showToast('success', 'อัปเดตรายการเรียบร้อย');
-                        await fetchInitialData();
-                        renderAdminServiceTable();
-                    } else {
-                        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
-                    }
-                }
-            });
+        function toggleNewCatInput() {
+            const select = document.getElementById('serviceFormCatSelect');
+            const newCatInput = document.getElementById('serviceFormCatNew');
+            
+            if (select.value === 'NEW') {
+                newCatInput.classList.remove('hidden');
+                newCatInput.focus();
+            } else {
+                newCatInput.classList.add('hidden');
+                newCatInput.value = '';
+            }
         }
+
+        function openServiceForm(id = null) {
+            document.getElementById('serviceFormModal').classList.remove('hidden');
+            
+            if (id) {
+                // โหมดแก้ไข
+                const service = globalServices.find(s => s.id === id);
+                document.getElementById('serviceFormTitle').innerText = 'แก้ไขรายการบริการ';
+                document.getElementById('serviceFormId').value = service.id;
+                populateCategoryDropdown(service.category);
+                document.getElementById('serviceFormName').value = service.name;
+                document.getElementById('serviceFormPrice').value = service.price;
+            } else {
+                // โหมดเพิ่มใหม่
+                document.getElementById('serviceFormTitle').innerText = 'เพิ่มบริการใหม่';
+                document.getElementById('serviceFormId').value = '';
+                populateCategoryDropdown();
+                document.getElementById('serviceFormName').value = '';
+                document.getElementById('serviceFormPrice').value = '';
+            }
+        }
+
+        function closeServiceForm() {
+            document.getElementById('serviceFormModal').classList.add('hidden');
+        }
+
+        async function saveServiceData() {
+            const id = document.getElementById('serviceFormId').value;
+            const selectCat = document.getElementById('serviceFormCatSelect').value;
+            let finalCat = selectCat;
+
+            if (selectCat === 'NEW') {
+                finalCat = document.getElementById('serviceFormCatNew').value.trim();
+            }
+
+            const name = document.getElementById('serviceFormName').value.trim();
+            const price = document.getElementById('serviceFormPrice').value.trim();
+
+            if (!finalCat || !name || !price) {
+                Swal.fire({ title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกข้อมูลให้ครบถ้วน', icon: 'warning', confirmButtonColor: '#000000' });
+                return;
+            }
+
+            const btn = document.getElementById('serviceFormSaveBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...`;
+
+            const action = id ? 'adminEditService' : 'adminAddService';
+            const payload = {
+                action: action,
+                id: id,
+                category: finalCat,
+                name: name,
+                price: price
+            };
+
+            try {
+                const res = await fetchAPI(payload);
+                if (res.status === 'success') {
+                    showToast('success', 'บันทึกข้อมูลสำเร็จ');
+                    closeServiceForm();
+                    await fetchInitialData();
+                    renderAdminServiceTable();
+                } else {
+                    Swal.fire({ title: 'เกิดข้อผิดพลาด', text: res.message, icon: 'error', confirmButtonColor: '#000000' });
+                }
+            } catch (err) {
+                Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'เชื่อมต่อระบบล้มเหลว', icon: 'error', confirmButtonColor: '#000000' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> บันทึกข้อมูล`;
+            }
+        }
+        // ==========================================
 
         function deleteServiceAction(id) {
             Swal.fire({
